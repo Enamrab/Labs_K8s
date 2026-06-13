@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ubuntu-deploy
+  name: ubuntu-deploy
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: ubuntu-deploy
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: ubuntu-deploy
+    spec:
+      containers:
+      - image: ubuntu:latest
+        name: ubuntu
+        stdin: true
+        tty: true
+        resources: {}
+status: {}

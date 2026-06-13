@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: test-pod
+  name: test-pod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-pod
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: test-pod
+    spec:
+      containers:
+      - image: nginx:alpine
+        name: nginx
+        ports:
+          - containerPort: 80
+        resources: {}
+status: {}
