@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: my-deploy
+  name: my-deploy
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: my-deploy
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: my-deploy
+    spec:
+      containers:
+      - image: ubuntu
+        name: ubuntu
+        command:
+          - /bin/bash
+          - -c
+          - |
+            while true;
+            do 
+            touch file{1..1000}.txt
+            echo "files created";
+            sleep 5;
+            done
+        resources:
+          requests:
+            cpu: 10m
+            memory: 15Mi
+status: {}

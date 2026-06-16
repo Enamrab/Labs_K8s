@@ -1,0 +1,21 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: my-deploy
+spec:
+  maxReplicas: 150
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageValue: 5m
+        type: AverageValue
+    type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: my-deploy
+status:
+  currentMetrics: null
+  desiredReplicas: 0
