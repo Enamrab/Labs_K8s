@@ -1,0 +1,12 @@
+Objective: learn use of pv, pvc, configmap and secrets in mysql database 
+Aim: To demonstrate use of pv, pvc, configmap and secrets 
+Procedure:
+Need to create:
+1. pv
+2. pvc
+3. configmap
+4. secret
+5. deploy
+6. service
+
+

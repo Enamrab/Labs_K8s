@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: phpmyadmin-service
+  namespace: default
+spec:
+  type: NodePort # Changes to 'LoadBalancer' if you are on cloud providers like AWS/GCP
+  selector:
+    app: phpmyadmin
+  ports:
+    - port: 80         # Port exposed on the cluster network
+      targetPort: 80   # Port inside the phpmyadmin container
+      nodePort: 32000  # Manual external port to view in your browser
+

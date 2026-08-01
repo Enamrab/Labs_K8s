@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phpmyadmin-deploy
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: phpmyadmin
+  template:
+    metadata:
+      labels:
+        app: phpmyadmin
+    spec:
+      containers:
+        - name: phpmyadmin
+          image: phpmyadmin:latest
+          ports:
+            - containerPort: 80
+              name: http
+          env:
+            # 1. Point phpMyAdmin to your existing MySQL service name
+            - name: PMA_HOST
+              value: "sql-svc" 
+            
+            # 2. Re-use your existing database username variable
+            - name: PMA_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: sql-config
+                  key: MYSQL_USER
+                  
+            # 3. Re-use your existing database user password variable
+            - name: PMA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sql-secret
+                  key: MYSQL_PASSWORD
+

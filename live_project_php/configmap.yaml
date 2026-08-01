@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sql-config
+  namespace: default
+data:
+  MYSQL_USER: "dbuser"
+  MYSQL_DATABASE: "mydb"
+  
+

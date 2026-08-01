@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sql-deploy
+  namespace: default
+  labels:
+    app: backend
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: sql-cont
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: sql-vol
+              mountPath: "/var/lib/mysql"
+          envFrom:
+            - configMapRef:
+                name: sql-config
+            - secretRef:
+                name: sql-secret
+      volumes:
+        - name: sql-vol
+          persistentVolumeClaim:
+            claimName: sql-pvc 
+            
