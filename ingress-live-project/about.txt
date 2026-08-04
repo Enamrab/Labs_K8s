@@ -1,0 +1,26 @@
+aad rahe bina ingress controller ke ingress work nahi karega            
+
+Humne kya kia:
+In order to learn ingress
+We first added ingress controller to our cluster in different namespace(doesn't matter)
+Then we created a mock app with path based URL for our ingress demo
+The app contained: one fronted end svc listening on port 80 and one backend service listening on port 5678
+Then we created tls:
+openssl req -x509 -nodes -days 365 -newkey rsa:2048   -keyout tls.key   -out tls.crt   -subj "/CN=my-local-apps.com"   -addext "subjectAltName = DNS:my-local-apps.com"
+Then we created secret: kubectl create secret tls tls-secret --cert=./tls.crt --key=./tls.key
+Then we created an ingress resource (path based with the command):
+kubectl create ingress multipath --class=nginx \
+  --rule="my-local-apps.com/welcome=frontend-svc:80" \
+  --rule="my-local-apps.com/api=backend-svc:80" \
+  --annotation="nginx.ingress.kubernetes.io/rewrite-target=/"
+Phir ismein tls add kiya
+Also we added host to our local terminal:
+sudo vim /etc/host --> add  172.16.0.3 my-local-apps.com
+Then we ran this k get svc -n ingress-nginx  to see our port forwarding(due to bare matal/restricted LB environment)
+
+At last we tested our app endpoints: curl -k https://my-local-apps.com:31205/welcome
+Also to keep in mind:
+The Role of Path Rewriting (rewrite-target):
+When routing to ://my-local-apps.com, the Ingress controller naturally passes the exact path /welcome straight to your backend container.
+If your application is only programmed to respond to root calls (/), it treats the forwarded /welcome path as an invalid resource and crashes with a 404 Not Found.
+The rewrite-target: / annotation intercepts the call, strips out /welcome, and delivers a clean / string down to your pod's processes.
