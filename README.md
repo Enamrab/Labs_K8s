@@ -50,6 +50,15 @@ A PHP + MySQL application demonstrating persistent storage and externalized conf
 - Full deploy/service manifests for a stateful backend
 
 ---
+### 🖥️ bash-scripts — Shell Scripting Fundamentals
+A few standalone scripts demonstrating core Bash concepts: argument parsing, command substitution, and control flow.
+
+- **`demo_backup.sh`** — Backs up a target directory to a timestamped `.tar` archive, using command substitution and string manipulation for dynamic naming.
+- **`temp_conv.sh`** — Fahrenheit ↔ Celsius converter using `getopts` for flag-based input.
+- **`timer.sh`** — Countdown timer that parses minutes/seconds via `getopts` and counts down using a `while` loop.
+
+**Run any script:** `bash bash-scripts/<script-name>.sh'
+---
 
 ## Stack
 `Kubernetes` `Docker` `Docker Compose` `NGINX` `MySQL` `Flask` `Python` `Bash`
