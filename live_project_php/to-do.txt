@@ -8,6 +8,6 @@ Need to create:
 4. secret
 5. deploy
 6. service
-dbuser password: LiveRootPass2026!
+
 
 
