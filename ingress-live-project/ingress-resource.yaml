@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: multipath
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: my-local-apps.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: frontend-svc
+            port:
+              number: 80
+        path: /welcome
+        pathType: Exact
+      - backend:
+          service:
+            name: backend-svc
+            port:
+              number: 5678
+        path: /data
+        pathType: Exact
+status:
+  loadBalancer: {}
