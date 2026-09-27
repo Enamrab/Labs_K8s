@@ -1,0 +1,14 @@
+This is a demo env file for app
+please don't use in production
+
+# --- MySQL container init ---
+MYSQL_ROOT_PASSWORD=root@123
+MYSQL_DATABASE=tasksdb
+MYSQL_USER=taskuser
+MYSQL_PASSWORD=root@123
+
+# --- Flask app DB connection (must match app.py's os.environ.get() names) ---
+DB_HOST=mysql
+DB_NAME=tasksdb
+DB_USER=taskuser
+DB_PASSWORD=root@123
