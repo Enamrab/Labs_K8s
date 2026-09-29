@@ -1,14 +1,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: my-deploy
+  name: my-hpa
 spec:
   maxReplicas: 100
   metrics:
   - resource:
       name: cpu
       target:
-        averageValue: 5m
+        averageValue: 50m
         type: AverageValue
     type: Resource
   minReplicas: 1
