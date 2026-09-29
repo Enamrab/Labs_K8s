@@ -5,7 +5,7 @@ metadata:
     app: my-deploy
   name: my-deploy
 spec:
-  replicas: 10
+  replicas: 5
   selector:
     matchLabels:
       app: my-deploy
@@ -23,13 +23,10 @@ spec:
           - -c
           - |
             while true;
-            do 
-            touch file{1..1000}.txt
-            echo "files created";
-            sleep 5;
+            do :;
             done
         resources:
           requests:
-            cpu: 10m
+            cpu: "5m"
             memory: 15Mi
 status: {}

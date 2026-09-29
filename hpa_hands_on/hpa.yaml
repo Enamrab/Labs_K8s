@@ -3,7 +3,7 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: my-deploy
 spec:
-  maxReplicas: 150
+  maxReplicas: 100
   metrics:
   - resource:
       name: cpu
