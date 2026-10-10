@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sidecar-log-example
+spec:
+  containers:
+  # Main Application Container
+  - name: app-container
+    image: alpine
+    command: ["/bin/sh", "-c"]
+    args: 
+    - >
+      while true; do
+        echo "$(date) - Application transaction successful." >> /var/log/app/output.log;
+        sleep 15;
+        echo "sleep time increased";
+      done
+    volumeMounts:
+    - name: log-volume
+      mountPath: /var/log/app
+
+  # Sidecar Container (Log Shipper/Processor)
+  - name: sidecar-log-shipper
+    image: alpine
+    command: ["/bin/sh", "-c"]
+    args: ["tail -f /var/log/app/output.log"]
+    volumeMounts:
+    - name: log-volume
+      mountPath: /var/log/app
+
+  # Shared Ephemeral Volume
+  volumes:
+  - name: log-volume
+    persistentVolumeClaim:
+      claimName: my-pvc

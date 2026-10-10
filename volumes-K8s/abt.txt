@@ -1,0 +1,47 @@
+Hi
+First we demonstarted emptyDir ephemeral volume storage in K8s
+Then we moved to persistent storage where we used static pv to store our data in a directory on any specific node assigned by scheduler
+
+# Kubernetes Volume Lifecycle Lab: Ephemeral vs. Persistent Storage
+
+This repository demonstrates the practical differences between ephemeral and persistent volume lifecycles in Kubernetes using a **Sidecar Pattern** (App Container + Log Shipper Container).
+
+---
+
+## 📁 Phase 1: Ephemeral Storage (`emptyDir`)
+An `emptyDir` volume is strictly tied to the lifecycle of the individual Pod. Multiple containers within the same Pod can share this directory, but the data is completely wiped if the Pod is deleted or recreated.
+
+### Configurations Applied
+### Key Commands executed:
+* **Exec into specific sidecar container:** `kubectl exec -it sidecar-log-example -c sidecar-log-shipper -- /bin/sh`
+* **Backup ephemeral logs before pod deletion:** `kubectl cp sidecar-log-example:/var/log/app/output.log ./local-backup-folder/output.log -c app-container`
+
+---
+
+## 💾 Phase 2: Persistent Storage (`PV` & `PVC`)
+To decouple the data's lifecycle from the Pod, we moved to static provisioning using a `PersistentVolume` (backed by a local node path) and a `PersistentVolumeClaim`.
+
+### 1. PersistentVolume (`pv.yaml`)
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: example-pv
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: /mnt/data/persistent-logs
+    type: DirectoryOrCreate
+```
+
+---
+## 🚀 Lab Outcomes & Validation
+1. **`emptyDir` Behavior:** Re-applying a standalone Pod configuration requires a full deletion. Deleting the Pod completely destroyed all accumulated log history inside the container file paths.
+2. **`PV/PVC` Behavior:** Switching to a `hostPath` PV bound to a PVC successfully routed the log output onto the actual node directory (`/mnt/data/persistent-logs`). When the Pod was deleted and recreated, the logs persisted natively on the infrastructure.
+
