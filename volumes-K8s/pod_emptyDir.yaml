@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: sidecar-log-example
+  name: ephermeral-vol-example
 spec:
   containers:
   # Main Application Container
-  - name: app-container
+  - name: cont-main
     image: alpine
     command: ["/bin/sh", "-c"]
     args: 
@@ -19,7 +19,7 @@ spec:
       mountPath: /var/log/app
 
   # Sidecar Container (Log Shipper/Processor)
-  - name: sidecar-log-shipper
+  - name: cont-sidecar
     image: alpine
     command: ["/bin/sh", "-c"]
     args: ["tail -f /var/log/app/output.log"]
