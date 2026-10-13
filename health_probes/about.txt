@@ -1,0 +1,14 @@
+
+Deployment-ready configuration grouping application into a scalable Deployment and automatically injecting the custom Nginx configuration using a ConfigMap to demonstrate health check probes in K8s.
+
+What it has:
+A basic nginx container listening on port 80 along with three endpoint for health check-ups inside config file:
+/healthz/startup --> for startupProbe
+/healthz/ready --> for readinessProbe
+/healthz/live --> for livenessProbe
+
+Dekho basic setup hai deployment ka containing 3 replicas of nginx container
+nginx apna traditional listening on port 80
+humne probes configure kiya to listen on different paths on the same port 80(different bhi kar saktein)
+
+Nginx default config samjne ke liye (kaise likha config file we dekh lo)

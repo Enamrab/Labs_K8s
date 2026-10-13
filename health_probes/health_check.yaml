@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-health-config
+  labels:
+    app: multi-probe-app
+data:
+  default.conf: |
+    server {
+        listen 80;
+        server_name localhost;
+
+        location / {
+            root   /usr/share/nginx/html;
+            index  index.html index.htm;
+        }
+
+        # Handle your custom Kubernetes health checks
+        location ~ ^/healthz/(startup|ready|live)$ {
+            access_log off;
+            default_type text/plain;
+            return 200 "healthy\n";
+        }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: all-probes-deployment
+  labels:
+    app: multi-probe-app
+spec:
+  replicas: 3 # Scales your app across 3 running instances
+  selector:
+    matchLabels:
+      app: multi-probe-app
+  template:
+    metadata:
+      labels:
+        app: multi-probe-app
+    spec:
+      containers:
+      - name: web-app
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        
+        # Mount the custom Nginx configuration file
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/nginx/conf.d
+        
+        # 1. STARTUP PROBE: Protects the container during initialization
+        startupProbe:
+          httpGet:
+            path: /healthz/startup
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 12
+          successThreshold: 1
+
+        # 2. READINESS PROBE: Controls traffic routing
+        readinessProbe:
+          httpGet:
+            path: /healthz/ready
+            port: 80
+          periodSeconds: 5
+          failureThreshold: 2
+          successThreshold: 1
+
+        # 3. LIVENESS PROBE: Controls container restarts
+        livenessProbe:
+          httpGet:
+            path: /healthz/live
+            port: 80
+          periodSeconds: 15
+          failureThreshold: 3
+          successThreshold: 1
+
+      # Define the volume referencing the ConfigMap above
+      volumes:
+      - name: config-volume
+        configMap:
+          name: nginx-health-config
+
