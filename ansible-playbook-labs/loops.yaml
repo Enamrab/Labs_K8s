@@ -1,0 +1,12 @@
+--- #loop playbook
+- hosts: demo
+  user: laborant
+  become: yes
+  tasks:
+    - name: add users
+      user: name='{{item}}' state=present
+      with_items:
+        - Bhpui
+        - enam
+        - fahad_rab
+
