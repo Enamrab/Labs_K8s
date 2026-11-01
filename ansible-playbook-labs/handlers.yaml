@@ -1,0 +1,15 @@
+--- #my handlers playbook
+#Handlers have a dependency on tasks
+#they run only when tasks have notify key
+#notify message should be as same as handlers name
+- hosts: demo
+  user: laborant
+  become: yes
+  connection: ssh
+  tasks:
+    - name: install apache2 on server
+      action: apt name=apache2 state=present
+      notify: start apache2
+  handlers:
+    - name: start apache2
+      action: service name=apache2 state=restarted

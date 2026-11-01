@@ -1,0 +1,9 @@
+--- #My first ansible playbook
+- hosts: demo
+  user: laborant
+  become: yes
+  connection: ssh
+  tasks:
+    - name: install apache2 on linux
+      action: apt name=apache2 state=absent
+

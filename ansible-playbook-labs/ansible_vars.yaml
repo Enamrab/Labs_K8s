@@ -1,0 +1,11 @@
+--- #my second ansible playbook
+- hosts: demo
+  user: laborant
+  become: yes
+  connection: ssh
+  vars:
+    pkgname: tree
+  tasks:
+    - name: install tree on all servers
+      action: apt name='{{pkgname}}' state=present
+
