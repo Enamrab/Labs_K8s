@@ -1,0 +1,44 @@
+
+Converting hostPath to a local PersistentVolume:
+A local PV is much safer than hostPath because it forces the Kubernetes scheduler to always place your Pod on the exact node where your data resides (node-02).
+
+Step 1: Prepare the directory on node-02
+Unlike hostPath, the local volume type does not support DirectoryOrCreate. You must manually create the folder on node-02 first.
+bash
+ssh node-02
+mkdir -p /home/laborant/local-data
+exit
+
+Step 2: Create the StorageClass and PersistentVolume (local-pv.yaml)
+Notice the volumeBindingMode: WaitForFirstConsumer in the StorageClass and the nodeAffinity block in the PV.
+yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-local-pv
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  local:
+    path: /home/laborant/local-data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - node-02
+Why this helps: Even if you delete and recreate your Pod 10 times, Kubernetes will never accidentally schedule it onto node-01 where the log files are missing.
