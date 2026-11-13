@@ -5,18 +5,18 @@ metadata:
 spec:
   maxReplicas: 100
   metrics:
-  - resource:
-      name: cpu
-      target:
-        averageValue: 50m
-        type: AverageValue
-    type: Resource
+   - resource:
+       name: cpu
+       target:
+         averageValue: 50m
+         type: AverageValue
+     type: Resource
   minReplicas: 1
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: my-deploy
-  behaviour:
+  behavior:
     scaleDown:
       stabilizationWindowSeconds: 30
 status:
