@@ -1,0 +1,15 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: myjob
+spec:
+  template:
+    metadata: {}
+    spec:
+      containers:
+      - image: ubuntu
+        name: myjob
+        command: [ "/bin/bash", "-c", "sleep 10s; echo EnamRAB-Doinnngg-Greattt!!!!!!1" ]
+        resources: {}
+      restartPolicy: Never
+status: {}

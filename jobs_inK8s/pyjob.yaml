@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: batch-data-processor
+spec:
+  completions: 5          # Total successful pod completions required
+  parallelism: 2          # Maximum pods allowed to run at the exact same time
+  backoffLimit: 4         # Maximum retry attempts before marking the job as failed
+  template:
+    spec:
+      containers:
+      - name: processor
+        image: python:3.9-slim
+        command: ["python", "-c", "print('Processing chunk...'); import time; time.sleep(5)"]
+      restartPolicy: Never # Jobs require 'Never' or 'OnFailure' instead of 'Always'
+

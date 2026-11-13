@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job2
+spec:
+  parallelism: 5
+  activeDeadlineSeconds: 50
+  template:
+    metadata: {}
+    spec:
+      containers:
+      - image: ubuntu
+        name: job2
+        command: [ "/bin/bash", "-c",  "sleep 5s; echo EnamDoing-Great!!!!!!!!" ]
+        resources: {}
+      restartPolicy: Never
+status: {}
