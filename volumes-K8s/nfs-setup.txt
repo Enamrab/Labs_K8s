@@ -1,0 +1,86 @@
+You can set up an NFS (Network File System) storage method right in your lab so your Pods can share persistent data across any node in your cluster.
+Unlike local volumes, NFS does not lock your Pod to a single worker node. Multiple Pods on different nodes can read and write to the exact same folder simultaneously (ReadWriteMany).
+
+Step 1: Configure the NFS Server (on cplane-01)
+Use your control plane node (cplane-01) as the NFS server for this lab. Run these commands on cplane-01 to install the NFS server, create the shared directory, and export it over the network:
+# 1. Install the NFS server package
+sudo apt update && sudo apt install -y nfs-kernel-server
+
+# 2. Create the shared folder and open permissions for the lab
+sudo mkdir -p /srv/nfs/kubedata
+sudo chown nobody:nogroup /srv/nfs/kubedata
+sudo chmod 777 /srv/nfs/kubedata
+
+# 3. Export the directory to your cluster network
+echo "/srv/nfs/kubedata *(rw,sync,no_subtree_check,no_root_squash)" | sudo tee -a /etc/exports
+sudo exportfs -ra
+sudo systemctl restart nfs-kernel-server
+Grab the IP address of cplane-01 (hostname -I) before moving to the next step.
+
+Step 2: Install NFS Client Tools on All Worker Nodes
+Every worker node (node-01 and node-02) must have the nfs-common helper installed so the kubelet can mount the NFS share when a Pod starts.
+SSH into both node-01 and node-02 and run:
+sudo apt update && sudo apt install -y nfs-common
+
+Step 3: Clean Up Your Previous Lab Resources
+Before applying the NFS configuration, remove your previous Pod, PVC, and local PV so there are no naming conflicts with my-pvc:
+kubectl delete pod sidecar-log-example
+kubectl delete pvc my-pvc
+kubectl delete pv my-local-pv
+
+Step 4: Create the NFS PV and PVC (nfs-pv-pvc.yaml)
+Create a new file named nfs-pv-pvc.yaml in your volumes-K8s directory. Replace <CPLANE_01_IP> with the IP address you noted in Step 1.
+yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-nfs-pv
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-manual
+  nfs:
+    server: 172.16.0.2
+    path: /srv/nfs/kubedata
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  storageClassName: nfs-manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+(Notice the PVC is still named my-pvc, which means your existing pod_pv.yaml will work without any changes).
+
+Step 5: Apply and Verify
+Apply the NFS manifest and redeploy your Pod:
+kubectl apply -f nfs-pv-pvc.yaml
+kubectl apply -f pod_pv.yaml
+
+Check that the PVC is Bound and see which node the Pod landed on:
+kubectl get pvc
+kubectl get pods -o wide
+Finally, verify directly on cplane-01 that the logs from the worker node are appearing on your NFS server:
+cat /srv/nfs/kubedata/output.log
+
+You are checking the directory on node-02, which is a worker node (the NFS client), instead of cplane-01, which is acting as your NFS server.
+Why the File Isn't There:
+• Server vs. Client: The /srv/nfs/kubedata folder lives exclusively on the NFS server (cplane-01).
+• How Kubelet Mounts It: When your Pod runs on node-02, Kubernetes mounts that remote folder from cplane-01 straight into a hidden kubelet directory inside /var/lib/kubelet/pods/..., not at /srv/nfs/kubedata on node-02.
+
+How to Check Your Logs Properly
+1. Exit node-02 to return to cplane-01:
+2. Verify your Pod and PVC status on cplane-01:
+kubectl get pvc
+kubectl get pods -o wide
+3. Check the NFS folder on cplane-01 (make sure you already completed Steps 1, 4, and 5 on cplane-01):bash
+cat /srv/nfs/kubedata/output.log
+(Note: Your terminal output also showed policy-rc.d denied execution of start when installing nfs-common on node-02. That is normal in containerized/lab VMs, and the NFS mount will still work as long as nfs-kernel-server is running on cplane-01.)
