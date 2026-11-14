@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: log-svc
+spec:
+  clusterIP: None
+  selector:
+    app: log-app
+  ports:
+    - port: 80
+      name: web
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: log-app
+spec:
+  serviceName: "log-svc"
+  replicas: 2
+  selector:
+    matchLabels:
+      app: log-app
+  template:
+    metadata:
+      labels:
+        app: log-app
+    spec:
+      containers:
+        - name: app-container
+          image: alpine
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              while true; do
+                echo "$(date) - Written by $HOSTNAME" >> /var/log/app/output.log;
+                sleep 10;
+              done
+          volumeMounts:
+            - name: log-storage
+              mountPath: /var/log/app
+  volumeClaimTemplates:
+    - metadata:
+        name: log-storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: "local-storage"
+        resources:
+          requests:
+            storage: 1Gi
+
