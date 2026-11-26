@@ -1,0 +1,40 @@
+This is the folder for learning argo rollouts 
+
+helm repo add argo https://argoproj.github.io/argo-helm
+helm repo update
+
+helm upgrade --install argocd argo/argo-cd \
+  --namespace argocd \
+  --create-namespace
+
+ArgoCD CLI:
+curl -fL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+rm argocd-linux-amd64
+
+kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath='{.data.password}' | base64 -d; echo
+
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'
+
+NODEPORT=$(kubectl get svc argocd-server -n argocd -o jsonpath='{.spec.ports[?(@.name=="https")].nodePort}')
+argocd login 172.16.0.2:$NODEPORT --insecure
+
+3. Install Argo Rollouts + Dashboard in the argo-rollouts namespace
+The argo/argo-rollouts chart includes the dashboard as a built-in toggle (dashboard.enabled=true), which is disabled by default:
+
+helm upgrade --install argo-rollouts argo/argo-rollouts \
+  --namespace argo-rollouts \
+  --create-namespace \
+  --set dashboard.enabled=true
+
+helm list -A
+kubectl get pods,svc -n argocd
+kubectl get pods,svc -n argo-rollouts
+
+4. Install the kubectl argo rollouts plugin (Linux amd64)
+Download, install, and verify the kubectl plugin binary for Linux amd64:
+
+curl -LO https://github.com/argoproj/argo-rollouts/releases/latest/download/kubectl-argo-rollouts-linux-amd64
+sudo install -m 555 kubectl-argo-rollouts-linux-amd64 /usr/local/bin/kubectl-argo-rollouts
+rm kubectl-argo-rollouts-linux-amd64
+kubectl argo rollouts version
